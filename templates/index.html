@@ -1,0 +1,78 @@
+{% extends "bootstrap/base.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deteksi Nominal Uang Kertas</title>
+    <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+    <div class="con">
+        <div class="form-wrapper">
+            <form action="/" method="POST" enctype="multipart/form-data">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-center">Deteksi Nominal Uang Kertas</h3>
+                    </div>
+                    <hr>
+                    <div class="card-body">
+                        <p class="notif">{% if SUCCESS %}
+                                <ul>
+                                    <li class="text-success">{{ SUCCESS }}</li>
+                                </ul>
+                            {% endif %}
+                            {% if FAILURE %}
+                                <ul>
+                                    <li class="text-danger">{{ FAILURE }}</li>
+                                </ul>
+                            {% endif %}
+                        </p>
+                        <div class="form-group">
+                            <label for="file">Foto Uang Kertas</label><br>
+                            <input type="file" name="file" class="form-control file" id="file">
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="form-group">
+                            <button class="btn btn-primary btn-sm" type="submit">Submit</button>
+                        </div>
+                    </div>
+                </div> 
+            </form>
+            <br>
+            {% if (nominal != none) %}
+            <div class="card">
+                <div class="card-header">
+                    <h4>Uang Yang Anda Upload</h4>
+                </div>
+                <div class="card-body">
+                    <img src="/static/uploads/{{ filename }}" width="400" alt="Uang.jpg">
+                </div>
+                <div class="card-footer">
+                    <ul>
+                        <li><h4 class="text-primary">Nominal : Rp.{{ nominal }}</h4></li>
+                        <li><h4 class="text-primary">Terhitung : {{ terhitung if terhitung != none else 'Uang tidak terdeteksi!' }}</h4></li>
+                    </ul>
+                </div>
+            </div>
+            <section id="audio-wrapper">
+                <audio controls autoplay>
+                    <source src="/static/audio/{{ nominal }}.ogg" type="audio/ogg">
+                    <source src="/static/audio/{{ nominal }}.mp3" type="audio/mpeg">
+                    </audio>
+            </section>
+            {% endif %}
+        </div>
+        <h1>{{ x }}</h1>
+    </div>
+    <footer>
+        <span>Created by Andri Yana. &copy; Copyright. 2021</span>
+    </footer>
+</body>
+</html>
+<script>
+</script>
+{% endblock %}
