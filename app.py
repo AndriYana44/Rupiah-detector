@@ -64,12 +64,12 @@ def upload():
             picture_rsz.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
         print('Upload_image filename: ' + filename)
-        SUCCESS = 'Image successfully uploaded and and displayed bellow'
+        SUCCESS = 'Image successfully uploaded and displayed bellow'
 
-        terhitung = get_contain(filename)        
+        terhitung = tm()
         nominal = text_to_nominal(terhitung)
-        if(terhitung == None):
-            terhitung = tm()
+        if(nominal == '-1'):
+            terhitung = get_contain(filename)        
             nominal = text_to_nominal(terhitung)
 
         return render_template('index.html', filename = filename, terhitung = terhitung, nominal = nominal, SUCCESS=SUCCESS)

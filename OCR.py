@@ -36,7 +36,7 @@ def re_2000(text):
 def condition(text):
     # ======= STRING ===========
     if len(text) > 30:
-        if re.search(SE + RATUS, text) :
+        if re.search(r'\s([+1]\d[0]{4})\s', text) or re.search(SE + RATUS, text) :
             return "Seratus Ribu Rupiah"
         elif re.search(LIMA + PULUH, text) :
             return "Lima Puluh Ribu Rupiah"
@@ -53,7 +53,7 @@ def condition(text):
         # ======= NUMBERS ==========
         if re.search(r'\s([+1]\d[0]{4})\s', text):
             return "Seratus Ribu Rupiah"
-        elif re.search(r'\s([+5]\d[0]{3})\s', text) or re.search(LIMA + PULUH, text):
+        elif re.search(r'\s([+5]\d[0]{3})\s', text):
             return "Lima Puluh Ribu Rupiah"
         elif re_20000(text):
             return "Dua Puluh Ribu Rupiah"
@@ -145,7 +145,11 @@ def resize_img(filename):
 def get_contain(filename):
     text = i2t('./static/uploads/' + filename)
     terhitung = condition(text.upper())
+    print(terhitung)
     if terhitung == None:
         terhitung = resize_img(filename)
 
     return terhitung
+
+if __name__ == '__main__':
+    get_contain()
