@@ -77,14 +77,16 @@ def template_matching():
                 if maxVal >= thershold:
                     cv2.rectangle(image_test, (startX, startY), (endX, endY), (0, 0, 255), 2)
         
+    hasil = None
     for res in detected:
         if max(acuracy) == res['acuracy']:
             result_nominal = res['nominal']
             result_list = result_nominal.split('/')
             result_fix = result_list[1]
             hasil = nominal_to_text(result_fix)
-            print(hasil)
 
+            print(detected)
+            print(hasil)
             return hasil
 
 if __name__ == '__main__':

@@ -10,6 +10,7 @@ from flask_bootstrap import Bootstrap
 from OCR import get_contain
 from OCR import text_to_nominal
 from uang_matching import template_matching as tm
+from color_matching import detectedColor, get_image, getAverage
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -25,6 +26,28 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def get_image(image_path):
+    image = Image.open(image_path, "r")
+    width, height = image.size
+    pixel_values = list(image.getdata())
+    channels = 3
+    pixel_values = np.array(pixel_values).reshape((width, height, channels))
+    return pixel_values
+
+def getAverage(item):
+    red = 0
+    green = 0
+    blue = 0
+    lenData = 0
+    for item1 in item:
+        for item2 in item1:
+            red += item2[0]
+            green += item2[1]
+            blue += item2[2]
+            lenData += 1
+        lenData += 1
+    return [round(red/lenData), round(green/lenData), round(blue/lenData)]
 
 @app.route("/")
 def index():
@@ -66,10 +89,15 @@ def upload():
         print('Upload_image filename: ' + filename)
         SUCCESS = 'Image successfully uploaded and displayed bellow'
 
-        terhitung = tm()
+        image = get_image(UPLOAD_FOLDER + filename)
+        rgb = getAverage(image)
+        terhitung = detectedColor(rgb)
         nominal = text_to_nominal(terhitung)
         if(nominal == '-1'):
-            terhitung = get_contain(filename)        
+            terhitung = get_contain(filename)
+            nominal = text_to_nominal(terhitung)
+        elif(nominal == '-1'):
+            terhitung = tm()    
             nominal = text_to_nominal(terhitung)
 
         return render_template('index.html', filename = filename, terhitung = terhitung, nominal = nominal, SUCCESS=SUCCESS)
