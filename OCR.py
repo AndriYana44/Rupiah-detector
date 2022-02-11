@@ -149,6 +149,7 @@ def get_contain(filename):
     if terhitung == None:
         terhitung = resize_img(filename)
 
+    print(terhitung)
     return terhitung
 
 if __name__ == '__main__':

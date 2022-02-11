@@ -3,7 +3,6 @@ import cv2, re, os
 import numpy as np
 import math
 from PIL import Image
-from matplotlib import pyplot as plt
 from flask import Flask, render_template, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from flask_bootstrap import Bootstrap
@@ -89,12 +88,13 @@ def upload():
         print('Upload_image filename: ' + filename)
         SUCCESS = 'Image successfully uploaded and displayed bellow'
 
-        image = get_image(UPLOAD_FOLDER + filename)
-        rgb = getAverage(image)
-        terhitung = detectedColor(rgb)
+        
+        terhitung = get_contain(filename)
         nominal = text_to_nominal(terhitung)
         if(nominal == '-1'):
-            terhitung = get_contain(filename)
+            image = get_image(UPLOAD_FOLDER + filename)
+            rgb = getAverage(image)
+            terhitung = detectedColor(rgb)
             nominal = text_to_nominal(terhitung)
         elif(nominal == '-1'):
             terhitung = tm()    
