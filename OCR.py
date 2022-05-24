@@ -145,11 +145,9 @@ def resize_img(filename):
 def get_contain(filename):
     text = i2t('./static/uploads/' + filename)
     terhitung = condition(text.upper())
-    print(terhitung)
     if terhitung == None:
         terhitung = resize_img(filename)
 
-    print(terhitung)
     return terhitung
 
 if __name__ == '__main__':

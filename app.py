@@ -6,18 +6,18 @@ from PIL import Image
 from flask import Flask, render_template, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from flask_bootstrap import Bootstrap
-from OCR import get_contain
-from OCR import text_to_nominal
-from uang_matching import template_matching as tm
-from color_matching import detectedColor, get_image, getAverage
+from OCR import get_contain, text_to_nominal
+from color_matching import getHighPercentage
 
 app = Flask(__name__)
 Bootstrap(app)
 
 UPLOAD_FOLDER = 'static/uploads/'
+COLOR_RECOGNIZE = 'static/uploads/color-recognize/'
 
 app.secret_key = 'secket_key'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['COLOR_RECOGNIZE'] = COLOR_RECOGNIZE
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # configuration file extension 
@@ -67,6 +67,7 @@ def upload():
     if file and allowed_file(file.filename):
         filename, file_extension = os.path.splitext(file.filename)
         filename = secure_filename('object.jpeg')
+
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         
         file_path = './static/uploads/' + filename
@@ -91,13 +92,18 @@ def upload():
         
         terhitung = get_contain(filename)
         nominal = text_to_nominal(terhitung)
-        if(nominal == '-1'):
-            image = get_image(UPLOAD_FOLDER + filename)
-            rgb = getAverage(image)
-            terhitung = detectedColor(rgb)
-            nominal = text_to_nominal(terhitung)
-        elif(nominal == '-1'):
-            terhitung = tm()    
+        if(nominal == '-1' or nominal == None or nominal == '0'):
+            # resize
+            basewidth = 400
+            img = Image.open(file)
+            wpercent = (basewidth / float(img.size[0]))
+            hsize = int((float(img.size[1]) * float(wpercent)))
+            img = img.resize((basewidth, hsize), Image.ANTIALIAS)
+            # save
+            img.save(os.path.join(app.config['COLOR_RECOGNIZE'], filename))
+
+            # read
+            terhitung = getHighPercentage('./static/uploads/color-recognize/' + filename)
             nominal = text_to_nominal(terhitung)
 
         return render_template('index.html', filename = filename, terhitung = terhitung, nominal = nominal, SUCCESS=SUCCESS)
@@ -106,4 +112,4 @@ def upload():
         return render_template('index.html', FAILURE = FAILURE)
 
 if __name__ == "__main__":
-    app.run(host='192.168.43.197', port=8080, debug=True)
+    app.run(port=8080, debug=True)

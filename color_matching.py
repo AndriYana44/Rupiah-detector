@@ -1,49 +1,37 @@
-from PIL import Image
-import numpy
+import cv2
+import numpy as np
 
-def get_image(image_path):
-    image = Image.open(image_path, "r")
-    width, height = image.size
-    pixel_values = list(image.getdata())
-    channels = 3
-    pixel_values = numpy.array(pixel_values).reshape((width, height, channels))
-    return pixel_values
+def getPixel(imgHsv, rgbLight, rgbDark):
+    light = np.array(rgbLight, np.uint8)
+    dark = np.array(rgbDark, np.uint8)
 
-def getAverage(item):
-    red = 0
-    green = 0
-    blue = 0
-    lenData = 0
-    for item1 in item:
-        for item2 in item1:
-            red += item2[0]
-            green += item2[1]
-            blue += item2[2]
-            lenData += 1
-        lenData += 1
-    return [round(red/lenData), round(green/lenData), round(blue/lenData)]
+    mask = cv2.inRange(imgHsv, light, dark)
+    result = np.round((cv2.countNonZero(mask) / (imgHsv.size / 3)) * 100, 2)
 
-def detectedColor(rgb):
+    # plt.imshow(mask, cmap='gray')
+    # plt.show()
 
-    # cek uang berdasarkan warna RGB
-    if (rgb[0] - rgb[1]) < 2 and (rgb[0] - rgb[1]) > -10 and rgb[2] > 125:
-        result = 'Dua ribu rupiah'
-    elif (rgb[0] - rgb[1]) < 17 and (rgb[0] - rgb[1]) > 4 and rgb[2] > 100 and rgb[2] < rgb[0] and rgb[2] < rgb[1]:
-        result = 'Lima ribu rupiah'
-    elif (rgb[0] - rgb[1]) > 0 and (rgb[0] - rgb[1]) < 50 and (rgb[2] - rgb[1]) > 20 and rgb[2] > rgb[1] and rgb[0] > rgb[1]:
-        result = 'Sepuluh ribu rupiah'
-    elif ((rgb[0] - rgb[1]) < 0 and (rgb[0] - rgb[1]) > -80) and rgb[2] > 50 and rgb[2] < rgb[1]:
-        result = 'Dua Puluh Ribu Rupiah'
-    elif (rgb[0] - rgb[1]) < -14 and (rgb[0] - rgb[1]) > -40 and (rgb[2] - rgb[1]) < 60 and rgb[2] > 50 and rgb[2] > rgb[0] and rgb[2] > rgb[1]:
-        result = 'Lima Puluh Ribu Rupiah'
-    elif (rgb[0] - rgb[1]) > 17 and (rgb[0] - rgb[1]) < 63 and (rgb[2] - rgb[1]) < 7 and (rgb[2] - rgb[1]) > -10 and rgb[2] > 50 and rgb[2] < rgb[0]:
-        result = 'Seratus Ribu Rupiah'
-    else :
-        result = 'yang anda masukan bukan uang'
+    return result
 
-    print(rgb)
-    print(result)
-    return (result)
+def getHighPercentage(path):
+    img = cv2.imread(path)   # read images with opencv
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    
+    dictResult = {}
+    seratusRibu = []
 
-if __name__ == '__main__':
-    detectedColor()
+    seratusRibu.append(getPixel(img_hsv, [0, 50, 5], [10, 200, 255]))       # Range HSV Seratus Ribu Rupiah
+    seratusRibu.append(getPixel(img_hsv, [161, 20, 20], [180,255,255]))
+    print(seratusRibu) 
+
+    dictResult['Seratus Ribu Rupiah'] = max(seratusRibu) # get max value from list
+    dictResult['Lima Puluh Ribu Rupiah'] = getPixel(img_hsv, [94, 50, 50], [120, 200, 255]) # Range HSV Lima Puluh Ribu Rupiah
+    dictResult['Dua Puluh Ribu Rupiah'] = getPixel(img_hsv, [43, 50, 50], [86, 255, 255])  # Range HSV Dua Puluh Ribu Rupiah
+    dictResult['Sepuluh ribu rupiah'] = getPixel(img_hsv, [130, 50, 50], [160, 255, 255]) # Range HSV Sepuluh Ribu Rupiah
+    dictResult['Lima ribu rupiah'] = getPixel(img_hsv, [15, 50, 50], [36, 255, 255])   # Range HSV Lima Ribu Rupiah
+    dictResult['Dua ribu rupiah'] = getPixel(img_hsv, [0, 0, 100], [255, 10, 255])     # Range HSV Dua Ribu Rupiah
+    dictResult['Seribu Rupiah'] = getPixel(img_hsv, [70, 0, 180], [80, 50, 255])    # Range HSV Seribu Rupiah
+
+    result = max(dictResult, key=dictResult.get)
+    print(dictResult)
+    return result
